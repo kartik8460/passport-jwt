@@ -1,26 +1,5 @@
 const User = require('./../models/user.model');
 const bcrypt = require('bcrypt');
-const jwtUtils = require('./../utils/jwt.util');
-const passport = require('passport');
-// let config = require('./../config/passport');
-// config(passport);
-const JWTStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
-const PUB_KEY = "THIS_IS_A_KEY";
-
-const options = {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: PUB_KEY
-};
-
-passport.use(new JWTStrategy(options, (jwt_payload, done) => {
-    User.findOne({_id: jwt_payload.sub}, (err, user) => {
-        if(err) return done(err, false);
-
-        if(user) return done(null, user);
-        else return done(null, false);
-    });
-}));
 
 exports.createUser = async (req, res, next) => {
     try {
@@ -44,8 +23,7 @@ exports.createUser = async (req, res, next) => {
     }
 };
 
-exports.getUserDetails =  (passport.authenticate('jwt', {
-    session: false}), async (req, res, next) => {
+exports.getUserDetails = async (req, res, next) => {
         try {
             const email = req.params.email;
             const user = await User.findOne({email: email});
@@ -53,7 +31,7 @@ exports.getUserDetails =  (passport.authenticate('jwt', {
         } catch (error) {
             res.send(500, error.message)
         }
-});
+};
 
 exports.login = async (req, res, next) => {
     try {
